@@ -26,6 +26,7 @@ import java.util.Map;
 @RequestMapping("tianjin")
 public class TianjinInfoOfLianjia {
 
+    //自动生成的数据库工具，由spring提供
     @Autowired
     private JdbcTemplate jdbcTemplate;
     private static String regex = "<!--[\\s\\S]*?-->";
@@ -35,10 +36,11 @@ public class TianjinInfoOfLianjia {
 
     @RequestMapping("lianjia")
     public void test(String[] args) throws Exception {
-
+        HttpClient client = new HttpClient();
+        HttpMethod getMethod = new GetMethod();
+        //根据筛选条件爬取前100页的信息
         for (int i = 11; i < 100; i++) {
-            HttpClient client = new HttpClient();
-            HttpMethod getMethod = new GetMethod(baseUrl + i);
+            getMethod.setPath(baseUrl + i);
             client.executeMethod(getMethod);
             String webContent = getMethod.getResponseBodyAsString();
             Document document = Jsoup.parse(webContent);
@@ -64,7 +66,7 @@ public class TianjinInfoOfLianjia {
                     map.put("unit_price", s.getElementsByClass("unit_price").get(0).text().split("元")[0]);
                     map.put("total_price", s.getElementsByClass("price_total").get(0).getElementsByTag("em").get(0).text());
                     System.out.println(JSON.toJSONString(map));
-
+                    //入库
                     jdbcTemplate.update("insert into tianjin_nankai_house_info VALUES (?,?,?,?,?,?,?)", new Object[]{
                             map.get("id"),
                             map.get("position"),
